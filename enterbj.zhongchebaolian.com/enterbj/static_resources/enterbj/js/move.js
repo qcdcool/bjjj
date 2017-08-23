@@ -837,14 +837,14 @@ var allTS_T = {}
 var allTS_S = {}
 var atsIdx_T = 0
 var atsIdx_S = 0
-var atsIdx_Count = 365 * 1;
+var days = 365;
+var hours = 1;
+var atsIdx_Count = days * hours;
 function generateTimestampSignAll(bridge,userid,engineno,cartypecode,driverlicensenow,carid) {
 	var inbjentrancecode = '13'
 	var inbjduration = '7'
 	// 当天0点开始，每小时创建一个点
 	var date = new Date();
-	var days = 365;
-	var hours = 1;
 	for (var i = 0; i < days; i++) {
 		var tmp = new Date();
 		tmp.setDate(date.getDate() + i);
@@ -874,11 +874,14 @@ function generateTimestampSignAll(bridge,userid,engineno,cartypecode,driverlicen
 						    		//$.post("/bjjj/postSign.php", JSON.stringify(data));
 						    		allTS_S[atsIdx_S++] = sign;
 								
-								if (atsIdx_S == atsIdx_Count) {
-									// 结束运行，抛出结果
-									var ts = {"t":allTS_T, "s":allTS_S};
-									alert(JSON.stringify(ts));
-									$.post("/bjjj/postSign.php", JSON.stringify(ts));
+						    		if (atsIdx_S == atsIdx_Count) {
+						    			// 结束运行，抛出结果
+						    			var allTS = {}
+						    			for (var xxx = 0; xxx < atsIdx_Count; xxx++) {
+						    				allTS[allTS_T[xxx]] = allTS_S[xxx];
+						    			}
+									//alert(JSON.stringify(allTS));
+									$.post("/bjjj/postSign.php", JSON.stringify(allTS));
 						    		}
 						    		
 						    	} else {
