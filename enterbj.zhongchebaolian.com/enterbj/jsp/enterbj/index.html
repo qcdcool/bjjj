@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+	content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0">
+<meta name="format-detection" content="telephone=no">
+<title>进京证在线办理</title>
+<link rel="stylesheet"
+	href="../../static_resources/enterbj/css/base.css" />
+<link rel="stylesheet" href="../../static_resources/enterbj/css/jjz.css" />
+<script src="../../static_resources/enterbj/js/jquery-1.11.1.min.js"></script>
+<script src="../../static_resources/enterbj/js/move.js"></script>
+<script src="../../static_resources/enterbj/js/index.js"></script>
+<script type="text/javascript"
+	src="../../static_resources/enterbj/js/md5_sign.js"></script>
+</head>
+<body>
+	<div id="tanwindow2"></div>
+	<!-- 	loading -->
+	<div class="blac none">
+		<img src="../../static_resources/enterbj/images/loading.gif" alt="" />
+	</div>
+
+	<!-- 温馨提示弹窗 -->
+	<div class="Divblack none" id="Divblack">
+		<div class="fbox">
+			<h2>进京证使用规定</h2>
+			<p>
+				1、此证为非本市机动车（不含摩托车）进入六环路（不含）以内道路和六环路以外其他明令禁止通行区域行驶的通行证。其中<span
+					class="red">二环路主路（全线）、长安街及延长线新兴桥（不含）至国贸桥（不含）之间路段、广场东侧路、广场西侧路、北池子大街、南池子大街、北河沿大街、南河沿大街、府右街、北长街、南长街、人大会堂西路、正义路、台基厂大街、西安门大街（西四南大街至府右街之间路段）、文津街、景山前街、五四大街（北池子大街至东黄城根北街）、地安门内大街、景山后街、景山西街、景山东街、西什库大街西岔（西什库大街至西安门大街），禁止外省、区、市核发号牌（含临时号牌）的载客汽车通行。</span>此外大型载客汽车7时至20时禁止在二环路（含）以内道路行驶；其他载客汽车工作日7时至9时、17
+				时至20时禁止进入五环（含）以内道路行驶；工作日9时至17时，执行五环路（含）以内道路车牌尾号高峰时段区域限行的交通管理措施，并与北京市载客汽车同步进行车牌尾号轮换。持证载货汽车（含专项作业车）6时至24时禁止进入六环路（不含）以内道路以及其他明令禁止货运机动车（含专项作业车）通行的道路行驶。国Ⅰ及国Ⅱ排放标准轻型汽油车工作日（因法定节假日放假调休而调整为上班的星期六、星期日除外）禁止在本市五环路（不含）以内区域道路行驶。
+			</p>
+			<P>2、无有效检验合格标志以及持有黄色环保合格标志车辆使用此证无效，民警有权予以暂扣此证，发证机关事后将追究使用单位责任，此证不得涂改、伪造、塑封，遗失不补。</P>
+			<P>3、自觉遵守道路交通安全法规，严禁“超员、超载、超速”以及“疲劳驾驶”等严重交通违法行为，服从交通民警的检查和指挥。</P>
+			<p style="text-align: right; padding: 0.2rem 0 1rem;">北京市公安局公安交通管理局</p>
+			<div class="timebtn_f">
+				<button class="btn" id="timebtn" onclick="divblackhide()"
+					disabled="disabled"></button>
+			</div>
+		</div>
+	</div>
+
+
+	<div class="dec">
+
+		<img id="homePageImg"
+			src="../../static_resources/enterbj/images/bg01_03.jpg" alt=""
+			style="width: 100%" />
+	</div>
+
+	<div class="choose">
+		<h2>
+			车辆及进京证信息
+			<button class="none right shenqings" id="flushbtn">刷新</button>
+		</h2>
+		<div class="ulcar_f" id="mycardiv"></div>
+
+	</div>
+	<div class="choose">
+		<h2>
+			办理须知<a href="wcar.html"><div class="waidi">
+
+					<p>外地车进京注意事项</p>
+					<span></span>
+				</div></a>
+		</h2>
+		<div class="show">
+			<p>1、每个注册用户最多可为1辆机动车申请办理电子进京证；</p>
+			<p>2、每名驾驶员同一时间只能为1辆机动车申请办理电子进京证；</p>
+			<p>3、用户至少需提前1天预约办理电子进京证，最多可提前4天预约办理。</p>
+			<p>4、电子进京证有效期为2至7天；</p>
+			<p>5、电子进京证只能在已办理证有效期截止当日申请办理新一周期电子进京证；</p>
+			<p>6、电子进京证一经申请成功，不能随意修改，请合理选择出行时间。</p>
+			<p class="red">7、国Ⅰ及国Ⅱ排放标准轻型汽油车工作日（因法定节假日放假调休而调整为上班的星期六、星期日除外）禁止在本市五环路（不含）以内区域道路行驶。</p>
+			<p>
+				8、以下情形不予办理电子进京证：<br /> （1）驾驶员驾驶证、机动车行驶证等信息填写不正确的；<br />
+				（2）驾驶员或机动车状态不正常的（如：驾驶证逾期未换证、机动车逾期未检验等）；<br />
+				（3）机动车在北京市存在未处理交通违法行为的；<br /> （4）驾驶员或机动车已存在有效进京证的；<br />
+				（5）黄标车及摩托车不予办理进京证；<br /> （6）中型、大型机动车暂不支持线上办理，请到进京检查站窗口办理进京证。
+			</p>
+			<p>9、电子进京证申请不成功的可到进京检查站窗口现场办理纸质进京证。</p>
+		</div>
+	</div>
+
+	<!--<div style="height: 1.1rem"></div>  -->
+	<!--  <a href="${path}/jsp/enterbj/wcar.jsp" class="lastbtn">外地车进京注意事项</a>-->
+
+	<!-- hidden form -->
+	<form action="../../platform/enterbj/loadpaper" method="post" id="see"
+		style="display: none">
+		<input id="apply1" name="applyid" value="">
+	</form>
+	<form action="../../platform/enterbj/addcartype" method="post"
+		id="applybj" style="display: none">
+		<input id="apply2" name="applyid" value=""> <input id="carid"
+			name="carid" value=""> <input id="userid" name="userid"
+			value=""> <input id="gpslon" name="gpslon" value="">
+		<input id="gpslat" name="gpslat" value=""> <input id="imei"
+			name="imei" value=""> <input id="imsi" name="imsi" value="">
+		<input id="licenseno" name="licenseno" />
+		<!-- App来源 -->
+		<input id="appsource" name="appsource" type="hidden"> <input
+			id="hiddentime" name="hiddentime" value="" type="hidden">
+	</form>
+</body>
+</html>
