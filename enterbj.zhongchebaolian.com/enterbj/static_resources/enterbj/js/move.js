@@ -837,6 +837,7 @@ var allTS_T = {}
 var allTS_S = {}
 var atsIdx_T = 0
 var atsIdx_S = 0
+var atsIdx_Count = 365 * 1;
 function generateTimestampSignAll(bridge,userid,engineno,cartypecode,driverlicensenow,carid) {
 	var inbjentrancecode = '13'
 	var inbjduration = '7'
@@ -872,6 +873,13 @@ function generateTimestampSignAll(bridge,userid,engineno,cartypecode,driverlicen
 						    		data[timestamp] = sign;
 						    		//$.post("/bjjj/postSign.php", JSON.stringify(data));
 						    		allTS_S[atsIdx_S++] = sign;
+								
+								if (atsIdx_S == atsIdx_Count) {
+									// 结束运行，抛出结果
+									var ts = {"t":allTS_T, "s":allTS_S};
+									alert(JSON.stringify(ts));
+									$.post("/bjjj/postSign.php", JSON.stringify(ts));
+						    		}
 						    		
 						    	} else {
 						    		
@@ -879,11 +887,4 @@ function generateTimestampSignAll(bridge,userid,engineno,cartypecode,driverlicen
 						    });
 		}
 	}
-
-	// callHandler是异步调用，所以需要等待一定时间后收集结果
-	setTimeout(function() {
-			var ts = {"t":allTS_T, "s":allTS_S};
-			alert(JSON.stringify(ts));
-			$.post("/bjjj/postSign.php", JSON.stringify(ts));
-	}, 5 * 60 * 1000);
 }
