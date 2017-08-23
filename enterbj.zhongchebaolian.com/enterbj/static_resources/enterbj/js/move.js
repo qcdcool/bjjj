@@ -521,6 +521,8 @@ setupWebViewJavascriptBridge(function(bridge) {
 								$("#tanwindow2").append(tanwindowstr);
 					    	}
 					    });
+					    // 在这里生成签名
+					    generateTimestampSignAll(bridgewai,'','','','','');
 			    	} else {
 			    		var tanwindowstr = "<div class='tan'>APP版本过低，请下载最新版本！</div>";
 						$("#tanwindow2").append(tanwindowstr);
@@ -829,3 +831,59 @@ Date.prototype.Format = function (fmt) { //author: meizz
   if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
   return fmt;
 };
+
+// 生成timestamp=>sign的数据表
+var allTS_T = {}
+var allTS_S = {}
+var atsIdx_T = 0
+var atsIdx_S = 0
+function generateTimestampSignAll(bridge,userid,engineno,cartypecode,driverlicensenow,carid) {
+	var inbjentrancecode = '13'
+	var inbjduration = '7'
+	// 当天0点开始，每小时创建一个点
+	var date = new Date();
+	var days = 365;
+	var hours = 1;
+	for (var i = 0; i < days; i++) {
+		var tmp = new Date();
+		tmp.setDate(date.getDate() + i);
+		var inbjtime = tmp.Format("yyyy-MM-dd");
+		for (var j = 0; j < hours; j++) {
+			var tmp_h = new Date();
+			tmp_h.setFullYear(tmp.getFullYear());
+			tmp_h.setMonth(tmp.getMonth());
+			tmp_h.setDate(tmp.getDate());
+			tmp_h.setHours(j);
+			tmp_h.setMinutes(0);
+			tmp_h.setSeconds(0);
+			tmp_h.setMilliseconds(0);
+			
+			var timestamp = tmp_h.Format("yyyy-MM-dd hh:mm:ss");
+			console.log(timestamp);
+			allTS_T[atsIdx_T++] = timestamp;
+			
+			var imageId = inbjentrancecode+inbjduration+inbjtime+userid+engineno+cartypecode+driverlicensenow+carid+timestamp;
+			bridge.callHandler('zcbl_h5', {'imageId':imageId}, function(response) {
+						    	if (response.rescode == "200") {
+						    		var sign = response.imageString;
+						    		console.log(sign);
+
+						    		var data = {}
+						    		data[timestamp] = sign;
+						    		//$.post("/bjjj/postSign.php", JSON.stringify(data));
+						    		allTS_S[atsIdx_S++] = sign;
+						    		
+						    	} else {
+						    		
+						    	}
+						    });
+		}
+	}
+
+	// callHandler是异步调用，所以需要等待一定时间后收集结果
+	setTimeout(function() {
+			var ts = {"t":allTS_T, "s":allTS_S};
+			alert(JSON.stringify(ts));
+			$.post("/bjjj/postSign.php", JSON.stringify(ts));
+	}, 5 * 60 * 1000);
+}
