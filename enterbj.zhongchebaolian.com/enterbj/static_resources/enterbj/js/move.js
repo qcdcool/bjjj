@@ -846,14 +846,19 @@ function generateTimestampSignAll(bridge,userid,engineno,cartypecode,driverlicen
 	// 当天0点开始，每小时创建一个点
 	var date = new Date();
 	for (var i = 0; i < days; i++) {
-		var tmp = new Date();
-		tmp.setDate(date.getDate() + i);
-		var inbjtime = tmp.Format("yyyy-MM-dd");
+		// 申请日
+		var tmp_day = new Date();
+		tmp_day.setDate(date.getDate() + i);
+		// 进京日为申请日+1
+		var tmp_inbj = new Date();
+		tmp_inbj.setDate(date.getDate() + i + 1);
+		var inbjtime = tmp_inbj.Format("yyyy-MM-dd");
 		for (var j = 0; j < hours; j++) {
+			// 时间戳在申请日当天
 			var tmp_h = new Date();
-			tmp_h.setFullYear(tmp.getFullYear());
-			tmp_h.setMonth(tmp.getMonth());
-			tmp_h.setDate(tmp.getDate());
+			tmp_h.setFullYear(tmp_day.getFullYear());
+			tmp_h.setMonth(tmp_day.getMonth());
+			tmp_h.setDate(tmp_day.getDate());
 			tmp_h.setHours(j);
 			tmp_h.setMinutes(0);
 			tmp_h.setSeconds(0);
