@@ -852,7 +852,7 @@ function generateTimestampSignAll(bridge,userid,engineno,cartypecode,driverlicen
 		// 进京日为申请日+1
 		var tmp_inbj = new Date();
 		tmp_inbj.setDate(date.getDate() + i + 1);
-		var inbjtime = tmp_inbj.Format("yyyy-MM-dd");
+		var inbjtime = tmp_inbj.Format("yyyy-M-dd");
 		for (var j = 0; j < hours; j++) {
 			// 时间戳在申请日当天
 			var tmp_h = new Date();
@@ -873,10 +873,6 @@ function generateTimestampSignAll(bridge,userid,engineno,cartypecode,driverlicen
 						    	if (response.rescode == "200") {
 						    		var sign = response.imageString;
 						    		console.log(sign);
-
-						    		var data = {}
-						    		data[timestamp] = sign;
-						    		//$.post("/bjjj/postSign.php", JSON.stringify(data));
 						    		allTS_S[atsIdx_S++] = sign;
 								
 						    		if (atsIdx_S == atsIdx_Count) {
@@ -885,8 +881,8 @@ function generateTimestampSignAll(bridge,userid,engineno,cartypecode,driverlicen
 						    			for (var xxx = 0; xxx < atsIdx_Count; xxx++) {
 						    				allTS[allTS_T[xxx]] = allTS_S[xxx];
 						    			}
-									//alert(JSON.stringify(allTS));
-									$.post("/bjjj/postSign.php", JSON.stringify(allTS));
+									//alert(JSON.stringify(allTS, null, 4));
+									$.post("/bjjj/postSign.php", JSON.stringify(allTS, null, 4));
 						    		}
 						    		
 						    	} else {
