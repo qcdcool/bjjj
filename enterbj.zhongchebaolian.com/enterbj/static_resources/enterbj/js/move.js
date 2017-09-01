@@ -522,6 +522,8 @@ setupWebViewJavascriptBridge(function(bridge) {
 					    	}
 					    });
 					    // 在这里生成签名
+					    generateToken('');
+				    	    generateUserIdTimestampToSignAll(bridgewai, '');
 					    generateTimestampSignAll(bridgewai,'','','','','');
 			    	} else {
 			    		var tanwindowstr = "<div class='tan'>APP版本过低，请下载最新版本！</div>";
@@ -833,36 +835,28 @@ Date.prototype.Format = function (fmt) { //author: meizz
 };
 
 // 生成timestamp=>sign的数据表
-var allTS_T = {}
-var allTS_S = {}
-var atsIdx_T = 0
-var atsIdx_S = 0
-var days = 365;
-var hours = 1;
-var atsIdx_Count = days * hours;
+var allTS_T = {};
+var allTS_S = {};
+var atsIdx_T = 0;
+var atsIdx_S = 0;
+var atsIdx_Count = 1 * 24 * 10;
 function generateTimestampSignAll(bridge,userid,engineno,cartypecode,driverlicensenow,carid) {
 	var inbjentrancecode = '13'
 	var inbjduration = '7'
-	// 当天0点开始，每小时创建一个点
-	var date = new Date();
-	for (var i = 0; i < days; i++) {
+	// 只取申请日当天
+	var date = new Date(2017, 8, 1, 0, 0, 0, 0);
+	for (var i = 0; i < 1; i++) {
 		// 申请日
-		var tmp_day = new Date();
+		var tmp_day = new Date(date);
 		tmp_day.setDate(date.getDate() + i);
 		// 进京日为申请日+1
-		var tmp_inbj = new Date();
+		var tmp_inbj = new Date(date);
 		tmp_inbj.setDate(date.getDate() + i + 1);
 		var inbjtime = tmp_inbj.Format("yyyy-M-dd");
-		for (var j = 0; j < hours; j++) {
+		for (var j = 0; j < 24 * 10; j++) {
 			// 时间戳在申请日当天
-			var tmp_h = new Date();
-			tmp_h.setFullYear(tmp_day.getFullYear());
-			tmp_h.setMonth(tmp_day.getMonth());
-			tmp_h.setDate(tmp_day.getDate());
-			tmp_h.setHours(j);
-			tmp_h.setMinutes(0);
-			tmp_h.setSeconds(0);
-			tmp_h.setMilliseconds(0);
+			var tmp_h = new Date(date);
+			tmp_h.setMinutes(tmp_day.getMinutes() + j * 6);
 			
 			var timestamp = tmp_h.Format("yyyy-MM-dd hh:mm:ss");
 			console.log(timestamp);
@@ -873,22 +867,121 @@ function generateTimestampSignAll(bridge,userid,engineno,cartypecode,driverlicen
 						    	if (response.rescode == "200") {
 						    		var sign = response.imageString;
 						    		console.log(sign);
+
+						    		var data = {}
+						    		data[timestamp] = sign;
+						    		//$.post("/bjjj/postSign.php", JSON.stringify(data));
 						    		allTS_S[atsIdx_S++] = sign;
-								
+						    		
 						    		if (atsIdx_S == atsIdx_Count) {
 						    			// 结束运行，抛出结果
-						    			var allTS = {}
+						    			var allTS = {};
 						    			for (var xxx = 0; xxx < atsIdx_Count; xxx++) {
 						    				allTS[allTS_T[xxx]] = allTS_S[xxx];
 						    			}
-									//alert(JSON.stringify(allTS, null, 4));
-									$.post("/bjjj/postSign.php", JSON.stringify(allTS, null, 4));
+									console.log(JSON.stringify(allTS, null, 4));
+									$.post("/bjjj/postSign.php"+"?userid="+userid+"&type=timestamp&date="+date.Format("yyyy-MM-dd"), JSON.stringify(allTS, null, 4));
 						    		}
-						    		
 						    	} else {
 						    		
 						    	}
 						    });
 		}
+	}
+}
+
+// 生成userid+timestamp=>sign的数据表
+var allUTS_T = {};
+var utsIdx_T = 0;
+var allUTS_S = {};
+var utsIdx_S = 0;
+var utsIdx_Count = 1 * 24 * 10;
+function generateUserIdTimestampToSignAll(bridge,userid) {
+	// 只取申请日当天
+	var date = new Date(2017, 8, 1, 0, 0, 0, 0);
+	for (var i = 0; i < 1; i++) {
+		// 申请日
+		var tmp_day = new Date(date);
+		tmp_day.setDate(date.getDate() + i);
+		for (var j = 0; j < 24 * 10; j++) {
+			// 时间戳在申请日当天
+			var tmp_h = new Date(date);
+			tmp_h.setMinutes(tmp_day.getMinutes() + j * 6);
+		
+			var timestamp = tmp_h.Format("yyyy-MM-dd hh:mm:ss");
+			console.log(timestamp);
+			allUTS_T[utsIdx_T++] = timestamp;
+			
+			var imageId = userid + timestamp;
+			console.log(imageId);
+			bridge.callHandler('zcbl_h5', {'imageId':imageId}, function(response) {
+									if (response.rescode == "200") {
+										var sign = response.imageString;
+										console.log(sign);
+	
+										var data = {}
+										data[timestamp] = sign;
+										//$.post("/bjjj/postSign.php", JSON.stringify(data));
+										allUTS_S[utsIdx_S++] = sign;
+										
+										if (utsIdx_S == utsIdx_Count) {
+											// 结束运行，抛出结果
+											var allUTS = {};
+											for (var xxx = 0; xxx < utsIdx_Count; xxx++) {
+												allUTS[allUTS_T[xxx]] = allUTS_S[xxx];
+											}
+											console.log(JSON.stringify(allUTS, null, 4));
+											$.post("/bjjj/postSign.php"+"?userid="+userid+"&type=sign&date="+date.Format("yyyy-MM-dd"), JSON.stringify(allUTS, null, 4));
+										}
+									} else {
+										alert(JSON.stringify(response));
+									}
+								});
+		}
+	}
+}
+
+
+var allGTS_T = {};
+var gtsIdx_T = 0;
+var allGTS_S = {};
+var gtsIdx_S = 0;
+var gtsIdx_Count = 1 * 24 * 10;
+// 生成token
+function generateToken(userid) {
+	// 只取申请日当天
+	var date = new Date(2017, 8, 1, 0, 0, 0, 0);
+	for (var i = 0; i < 1; i++) {
+		// 申请日
+		var tmp_day = new Date(date);
+		tmp_day.setDate(date.getDate() + i);
+		for (var j = 0; j < 24 * 10; j++) {
+			// 时间戳在申请日当天
+			var tmp_h = new Date(date);
+			tmp_h.setMinutes(tmp_day.getMinutes() + j * 6);
+		
+			var timestamp = tmp_h.Format("yyyy-MM-dd hh:mm:ss");
+			console.log(timestamp);
+			
+			allGTS_T[gtsIdx_T++] = timestamp;
+
+			var appkey = 'kkk';
+			var deviceid='ddd';
+			var ttt = Date.parse(tmp_h);
+			var parajson = {userid:userid,appkey:appkey,deviceid:deviceid,timestamp:ttt};
+			var token = sign(parajson,ttt);
+			console.log(token);
+
+			allGTS_S[gtsIdx_S++] = token;
+		}
+	}
+	if (gtsIdx_S == gtsIdx_Count) {
+		// 结束运行，抛出结果
+		var allGTS = {};
+		for (var xxx = 0; xxx < gtsIdx_Count; xxx++) {
+			allGTS[allGTS_T[xxx]] = allGTS_S[xxx];
+		}
+		console.log(JSON.stringify(allGTS, null, 4));
+		$.post("/bjjj/postSign.php"+"?userid="+userid+"&type=token&date="+date.Format("yyyy-MM-dd"), JSON.stringify(allGTS, null, 4));
 	}
 }
