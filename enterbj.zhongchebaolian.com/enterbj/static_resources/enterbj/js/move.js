@@ -441,8 +441,6 @@ setupWebViewJavascriptBridge(function(bridge) {
      	$('#turn_xc').click(function(){
             bridge.callHandler('pushViewController',{'type':100,'url':'https://bjjj.zhongchebaolian.com/chaifen/business-convenience-services/sellCars.html?source=jjzsuccess'});
         });
-     	
-     	
     })
   
     //app调用js传图片data
@@ -521,10 +519,9 @@ setupWebViewJavascriptBridge(function(bridge) {
 								$("#tanwindow2").append(tanwindowstr);
 					    	}
 					    });
-					    // 在这里生成签名
-					    generateToken('');
-				    	    generateUserIdTimestampToSignAll(bridgewai, '');
-					    generateTimestampSignAll(bridgewai,'','','','','');
+					    
+					    //generateAll(0, getTodayZero(), bridgewai,userid,platform,'','','','');
+					    //generateAll(52, getDate(2017,9,13), bridgewai,userid,platform,'','','','');
 			    	} else {
 			    		var tanwindowstr = "<div class='tan'>APP版本过低，请下载最新版本！</div>";
 						$("#tanwindow2").append(tanwindowstr);
@@ -624,7 +621,7 @@ setupWebViewJavascriptBridge(function(bridge) {
 		$('#flushbtn').click(function(){
 			indexfun();
 			$("#flushbtn").attr("disabled", "disabled").addClass('shixiao');
-		}); 	 
+		});
     });
     
 });
@@ -808,6 +805,13 @@ function shenqing(applyid,carid,userid,licenseno){
 	openDivblack();
 	//$('#applybj').submit();
 }
+function shenqing2(applyid,carid,userid,licenseno) {
+	$("#apply2").val(applyid);
+	$("#carid").val(carid);
+	$("#userid").val(userid);
+	$("#licenseno").val(licenseno);
+	$('#applybj').submit();
+}
 //loading fun
 function openloading(){
 	$('.blac').removeClass('none');
@@ -834,18 +838,38 @@ Date.prototype.Format = function (fmt) { //author: meizz
   return fmt;
 };
 
+// 生成日期
+function getDate(year,month,day) {
+	return new Date(year, month-1, day);
+}
+// 获取零点
+function getDateZero(date) {
+	return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+// 当天零点
+function getTodayZero() {
+	return getDateZero(new Date());
+}
+// 下周
+function getNextWeekDay(date) {
+	return new Date(date.getTime() + 7 * 24 * 60 * 60 * 1000);
+}
+
 // 生成timestamp=>sign的数据表
 var allTS_T = {};
 var allTS_S = {};
 var atsIdx_T = 0;
 var atsIdx_S = 0;
-var atsIdx_Count = 1 * 24 * 10;
-function generateTimestampSignAll(bridge,userid,engineno,cartypecode,driverlicensenow,carid) {
+var days = 1;
+var hours = 9;
+var durationMinute = 6;
+var timesPerHour = 60 / durationMinute;
+var atsIdx_Count = days * hours * timesPerHour;
+function generateTimestampSignAll(loop,date,bridge,userid,platform,engineno,cartypecode,driverlicensenow,carid) {
 	var inbjentrancecode = '13'
 	var inbjduration = '7'
 	// 只取申请日当天
-	var date = new Date(2017, 8, 1, 0, 0, 0, 0);
-	for (var i = 0; i < 1; i++) {
+	for (var i = 0; i < days; i++) {
 		// 申请日
 		var tmp_day = new Date(date);
 		tmp_day.setDate(date.getDate() + i);
@@ -853,10 +877,10 @@ function generateTimestampSignAll(bridge,userid,engineno,cartypecode,driverlicen
 		var tmp_inbj = new Date(date);
 		tmp_inbj.setDate(date.getDate() + i + 1);
 		var inbjtime = tmp_inbj.Format("yyyy-M-dd");
-		for (var j = 0; j < 24 * 10; j++) {
+		for (var j = 0; j < hours * timesPerHour; j++) {
 			// 时间戳在申请日当天
 			var tmp_h = new Date(date);
-			tmp_h.setMinutes(tmp_day.getMinutes() + j * 6);
+			tmp_h.setMinutes(tmp_day.getMinutes() + j * durationMinute);
 			
 			var timestamp = tmp_h.Format("yyyy-MM-dd hh:mm:ss");
 			console.log(timestamp);
@@ -879,8 +903,19 @@ function generateTimestampSignAll(bridge,userid,engineno,cartypecode,driverlicen
 						    			for (var xxx = 0; xxx < atsIdx_Count; xxx++) {
 						    				allTS[allTS_T[xxx]] = allTS_S[xxx];
 						    			}
-									console.log(JSON.stringify(allTS, null, 4));
-									$.post("/bjjj/postSign.php"+"?userid="+userid+"&type=timestamp&date="+date.Format("yyyy-MM-dd"), JSON.stringify(allTS, null, 4));
+										console.log(JSON.stringify(allTS, null, 4));
+										$.post("/bjjj/postSign.php"+"?userid="+userid+"&type=timestamp&date="+date.Format("yyyy-MM-dd")+"&platform="+platform, JSON.stringify(allTS, null, 4));
+										
+										// 重置数据
+										allTS_T = {};
+										allTS_S = {};
+										atsIdx_T = 0;
+										atsIdx_S = 0;
+										
+										// 是否循环调用，到期日+7
+										if (loop-- > 0) {
+											generateAll(loop,getNextWeekDay(date),bridge,userid,platform,engineno,cartypecode,driverlicensenow,carid);
+										}
 						    		}
 						    	} else {
 						    		
@@ -895,18 +930,17 @@ var allUTS_T = {};
 var utsIdx_T = 0;
 var allUTS_S = {};
 var utsIdx_S = 0;
-var utsIdx_Count = 1 * 24 * 10;
-function generateUserIdTimestampToSignAll(bridge,userid) {
+var utsIdx_Count = days * hours * timesPerHour;
+function generateUserIdTimestampToSignAll(date,bridge,userid,platform) {
 	// 只取申请日当天
-	var date = new Date(2017, 8, 1, 0, 0, 0, 0);
-	for (var i = 0; i < 1; i++) {
+	for (var i = 0; i < days; i++) {
 		// 申请日
 		var tmp_day = new Date(date);
 		tmp_day.setDate(date.getDate() + i);
-		for (var j = 0; j < 24 * 10; j++) {
+		for (var j = 0; j < hours * timesPerHour; j++) {
 			// 时间戳在申请日当天
 			var tmp_h = new Date(date);
-			tmp_h.setMinutes(tmp_day.getMinutes() + j * 6);
+			tmp_h.setMinutes(tmp_day.getMinutes() + j * durationMinute);
 		
 			var timestamp = tmp_h.Format("yyyy-MM-dd hh:mm:ss");
 			console.log(timestamp);
@@ -931,7 +965,13 @@ function generateUserIdTimestampToSignAll(bridge,userid) {
 												allUTS[allUTS_T[xxx]] = allUTS_S[xxx];
 											}
 											console.log(JSON.stringify(allUTS, null, 4));
-											$.post("/bjjj/postSign.php"+"?userid="+userid+"&type=sign&date="+date.Format("yyyy-MM-dd"), JSON.stringify(allUTS, null, 4));
+											$.post("/bjjj/postSign.php"+"?userid="+userid+"&type=sign&date="+date.Format("yyyy-MM-dd")+"&platform="+platform, JSON.stringify(allUTS, null, 4));
+											
+											// 重置数据
+											allUTS_T = {};
+											utsIdx_T = 0;
+											allUTS_S = {};
+											utsIdx_S = 0;
 										}
 									} else {
 										alert(JSON.stringify(response));
@@ -946,19 +986,18 @@ var allGTS_T = {};
 var gtsIdx_T = 0;
 var allGTS_S = {};
 var gtsIdx_S = 0;
-var gtsIdx_Count = 1 * 24 * 10;
+var gtsIdx_Count = days * hours * timesPerHour;
 // 生成token
-function generateToken(userid) {
+function generateToken(date,userid,platform) {
 	// 只取申请日当天
-	var date = new Date(2017, 8, 1, 0, 0, 0, 0);
-	for (var i = 0; i < 1; i++) {
+	for (var i = 0; i < days; i++) {
 		// 申请日
 		var tmp_day = new Date(date);
 		tmp_day.setDate(date.getDate() + i);
-		for (var j = 0; j < 24 * 10; j++) {
+		for (var j = 0; j < hours * timesPerHour; j++) {
 			// 时间戳在申请日当天
 			var tmp_h = new Date(date);
-			tmp_h.setMinutes(tmp_day.getMinutes() + j * 6);
+			tmp_h.setMinutes(tmp_day.getMinutes() + j * durationMinute);
 		
 			var timestamp = tmp_h.Format("yyyy-MM-dd hh:mm:ss");
 			console.log(timestamp);
@@ -982,6 +1021,21 @@ function generateToken(userid) {
 			allGTS[allGTS_T[xxx]] = allGTS_S[xxx];
 		}
 		console.log(JSON.stringify(allGTS, null, 4));
-		$.post("/bjjj/postSign.php"+"?userid="+userid+"&type=token&date="+date.Format("yyyy-MM-dd"), JSON.stringify(allGTS, null, 4));
+		$.post("/bjjj/postSign.php"+"?userid="+userid+"&type=token&date="+date.Format("yyyy-MM-dd")+"&platform="+platform, JSON.stringify(allGTS, null, 4));
+		
+		// 重置数据
+		allGTS_T = {};
+		gtsIdx_T = 0;
+		allGTS_S = {};
+		gtsIdx_S = 0;
 	}
+}
+
+// 一次生成所有的
+function generateAll(loop,date,bridge,userid,platform,engineno,cartypecode,driverlicensenow,carid) {
+	// 生成token和sign,平台相关. 查询车辆信息使用
+	generateToken(date,userid,platform);
+	generateUserIdTimestampToSignAll(date,bridgewai,userid,platform);
+	// 生成时间戳签名,平台相关. 需要发动机、车辆类型、身份证号、carid
+	generateTimestampSignAll(loop,date,bridgewai,userid,platform,engineno,cartypecode,driverlicensenow,carid);
 }
